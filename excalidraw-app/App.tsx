@@ -32,7 +32,7 @@ import {
   isDevEnv,
 } from "@excalidraw/common";
 import polyfill from "@excalidraw/excalidraw/polyfill";
-import { useCallback, useEffect, useRef, useState } from "react";
+import React, { useCallback, useEffect, useRef, useState } from "react";
 import { loadFromBlob } from "@excalidraw/excalidraw/data/blob";
 import { useCallbackRefState } from "@excalidraw/excalidraw/hooks/useCallbackRefState";
 import { t } from "@excalidraw/excalidraw/i18n";
@@ -1169,6 +1169,24 @@ const ExcalidrawApp = () => {
     window.location.pathname === "/excalidraw-plus-export";
   if (isCloudExportWindow) {
     return <ExcalidrawPlusIframeExport />;
+  }
+
+  // Check if document editor mode is enabled via URL parameter
+  const searchParams = new URLSearchParams(window.location.search);
+  const isDocumentEditorMode = searchParams.get("mode") === "document";
+
+  if (isDocumentEditorMode) {
+    // Lazy load DocumentEditor to avoid loading it unless needed
+    const DocumentEditorDemo = React.lazy(
+      () => import("./components/DocumentEditorDemo").then((mod) => ({ default: mod.DocumentEditorDemo })),
+    );
+    return (
+      <TopErrorBoundary>
+        <React.Suspense fallback={<div>Loading document editor...</div>}>
+          <DocumentEditorDemo />
+        </React.Suspense>
+      </TopErrorBoundary>
+    );
   }
 
   return (
