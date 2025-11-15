@@ -13,6 +13,7 @@ interface TextEditorProps {
   isActive: boolean;
   onContentChange: (blockId: string, content: string) => void;
   onEnterKey: (blockId: string) => void;
+  onBackspaceEmpty: (blockId: string) => void;
   onFocus: (blockId: string) => void;
   onBlur: () => void;
   onHeightChange?: (blockId: string, height: number) => void;
@@ -23,6 +24,7 @@ export const TextEditor: React.FC<TextEditorProps> = ({
   isActive,
   onContentChange,
   onEnterKey,
+  onBackspaceEmpty,
   onFocus,
   onBlur,
   onHeightChange,
@@ -60,9 +62,12 @@ export const TextEditor: React.FC<TextEditorProps> = ({
       if (e.key === "Enter" && !e.shiftKey) {
         e.preventDefault();
         onEnterKey(block.id);
+      } else if (e.key === "Backspace" && block.content === "") {
+        e.preventDefault();
+        onBackspaceEmpty(block.id);
       }
     },
-    [block.id, onEnterKey],
+    [block.id, block.content, onEnterKey, onBackspaceEmpty],
   );
 
   const handleFocus = useCallback(() => {

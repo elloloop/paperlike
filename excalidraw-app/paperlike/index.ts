@@ -8,3 +8,4 @@ export { PaperlikeEditor } from "./PaperlikeEditor";
 export { TextEditor } from "./TextEditor";
 export * from "./types";
 export * from "./documentState";
+export * from "./storage";

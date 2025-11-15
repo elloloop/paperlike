@@ -178,3 +178,38 @@ export const updateExcalidrawElements = (
     },
   };
 };
+
+/**
+ * Delete a text block
+ */
+export const deleteTextBlock = (
+  doc: PaperlikeDocument,
+  blockId: string,
+): PaperlikeDocument => {
+  const blockIndex = doc.textBlocks.findIndex((b) => b.id === blockId);
+  
+  if (blockIndex === -1 || doc.textBlocks.length === 1) {
+    // Don't delete if it's the only block
+    return doc;
+  }
+
+  const deletedBlock = doc.textBlocks[blockIndex];
+  const heightToRemove = deletedBlock.height + DEFAULT_LAYOUT.paragraphSpacing;
+
+  return {
+    ...doc,
+    textBlocks: doc.textBlocks
+      .filter((b) => b.id !== blockId)
+      .map((block, idx) => {
+        // Shift subsequent blocks up
+        if (idx >= blockIndex) {
+          return { ...block, y: block.y - heightToRemove };
+        }
+        return block;
+      }),
+    metadata: {
+      ...doc.metadata,
+      modified: Date.now(),
+    },
+  };
+};
