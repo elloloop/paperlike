@@ -12,6 +12,7 @@ import {
   addTextBlockAfter,
   updateTextBlock,
   updateExcalidrawElements,
+  DEFAULT_LAYOUT,
 } from "./documentState";
 import { TextEditor } from "./TextEditor";
 import type { ExcalidrawImperativeAPI } from "@excalidraw/excalidraw/types";
@@ -30,16 +31,45 @@ export const PaperlikeEditor: React.FC = () => {
     [setDocument],
   );
 
+  const handleHeightChange = useCallback(
+    (blockId: string, newHeight: number) => {
+      setDocument((doc) => {
+        const blockIndex = doc.textBlocks.findIndex((b) => b.id === blockId);
+        if (blockIndex === -1) return doc;
+
+        const heightDiff = newHeight - doc.textBlocks[blockIndex].height;
+        if (Math.abs(heightDiff) < 1) return doc; // Ignore tiny changes
+
+        return {
+          ...doc,
+          textBlocks: doc.textBlocks.map((block, idx) => {
+            if (idx === blockIndex) {
+              return { ...block, height: newHeight };
+            } else if (idx > blockIndex) {
+              return { ...block, y: block.y + heightDiff };
+            }
+            return block;
+          }),
+          metadata: {
+            ...doc.metadata,
+            modified: Date.now(),
+          },
+        };
+      });
+    },
+    [setDocument],
+  );
+
   const handleEnterKey = useCallback(
     (blockId: string) => {
       setDocument((doc) => {
         const newDoc = addTextBlockAfter(doc, blockId);
         // Focus the new block
-        const newBlock = newDoc.textBlocks.find(
-          (b) => b.y > doc.textBlocks.find((tb) => tb.id === blockId)!.y,
-        );
-        if (newBlock) {
-          setActiveBlockId(newBlock.id);
+        const blockIndex = doc.textBlocks.findIndex((b) => b.id === blockId);
+        if (blockIndex !== -1 && newDoc.textBlocks[blockIndex + 1]) {
+          setTimeout(() => {
+            setActiveBlockId(newDoc.textBlocks[blockIndex + 1].id);
+          }, 0);
         }
         return newDoc;
       });
@@ -100,6 +130,7 @@ export const PaperlikeEditor: React.FC = () => {
               onEnterKey={handleEnterKey}
               onFocus={handleFocus}
               onBlur={handleBlur}
+              onHeightChange={handleHeightChange}
             />
           ))}
         </div>

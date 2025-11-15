@@ -15,6 +15,7 @@ interface TextEditorProps {
   onEnterKey: (blockId: string) => void;
   onFocus: (blockId: string) => void;
   onBlur: () => void;
+  onHeightChange?: (blockId: string, height: number) => void;
 }
 
 export const TextEditor: React.FC<TextEditorProps> = ({
@@ -24,6 +25,7 @@ export const TextEditor: React.FC<TextEditorProps> = ({
   onEnterKey,
   onFocus,
   onBlur,
+  onHeightChange,
 }) => {
   const textareaRef = useRef<HTMLTextAreaElement>(null);
 
@@ -32,6 +34,19 @@ export const TextEditor: React.FC<TextEditorProps> = ({
       textareaRef.current.focus();
     }
   }, [isActive]);
+
+  // Auto-resize textarea
+  useEffect(() => {
+    if (textareaRef.current) {
+      textareaRef.current.style.height = "auto";
+      const newHeight = textareaRef.current.scrollHeight;
+      textareaRef.current.style.height = `${newHeight}px`;
+      
+      if (onHeightChange && newHeight !== block.height) {
+        onHeightChange(block.id, newHeight);
+      }
+    }
+  }, [block.content, block.id, block.height, onHeightChange]);
 
   const handleChange = useCallback(
     (e: React.ChangeEvent<HTMLTextAreaElement>) => {
@@ -74,7 +89,6 @@ export const TextEditor: React.FC<TextEditorProps> = ({
         onFocus={handleFocus}
         onBlur={onBlur}
         placeholder="Type here..."
-        rows={1}
         style={{
           fontSize: block.formatting?.fontSize || 16,
           fontWeight: block.formatting?.bold ? "bold" : "normal",
