@@ -1,0 +1,32 @@
+/**
+ * PaperlikeEditor Styles
+ */
+
+.paperlike-editor {
+  width: 100vw;
+  height: 100vh;
+  position: relative;
+  overflow: hidden;
+  background: #ffffff;
+}
+
+.paperlike-canvas-container {
+  width: 100%;
+  height: 100%;
+  position: relative;
+}
+
+.paperlike-text-layer {
+  position: absolute;
+  top: 0;
+  left: 0;
+  width: 100%;
+  height: 100%;
+  pointer-events: none;
+  z-index: 999;
+}
+
+/* Allow text blocks to receive pointer events */
+.paperlike-text-layer > * {
+  pointer-events: auto;
+}
